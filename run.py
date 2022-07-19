@@ -1,44 +1,58 @@
 import cv2
-# import argparse
-import matplotlib.pyplot as plt
+import argparse
 import numpy as np
 import os
 
 IMG_PATH = "images/"
-
-# arguments
-# parser = argparse.ArgumentParser()
-# parser.add_argument("-s", "--src", dest="src", 
-#                     help="Specify a source image, otherwise use all images by default",
-#                     default="ALL", type=str)
-
+OUTPUT_PATH = "outputs/"
+KERNEL = np.ones((3,3), np.uint8)
 
 def load_images(path):
-    '''Load all images from the given path and return an array'''
+    '''Return an array of tuples with all the images in the given path and their filename'''
     images = []
-    for file in os.listdir(path):
-        img = cv2.imread(os.path.join(path, file))
-        images.append(img)
+    for filename in os.listdir(path):
+        img = cv2.imread(os.path.join(path, filename))
+        images.append((img, filename))
     return images
 
-images = load_images(IMG_PATH)
+if __name__=='__main__':
 
-kernel = np.ones((5,5), np.uint8)
+    # Argument Parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--save", dest="save", 
+                        help="Set this to True if you want the output masks to be saved.",
+                        default=False, type=bool)
+    parser.add_argument("-d", "--display", dest="display", 
+                        help="Set this to True if you want each mask to be displayed after creating it",
+                        default=False, type=bool)
+    args = parser.parse_args()
 
-for image in images:
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    images = load_images(IMG_PATH)
 
-    mask1 = cv2.inRange(hsv_image, (0, 140, 70), (5, 255, 255))
-    mask2 = cv2.inRange(hsv_image, (170, 140, 70), (180, 255, 255))
-    mask = mask1 + mask2
+    for image, filename in images:
 
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        # Create a mask that looks for red at the beginning of the hue spectrum
+        mask1 = cv2.inRange(hsv_image, (0, 160, 80), (1, 255, 255))
 
+        # Create a mask that looks for red at the end of the hue spectrum
+        mask2 = cv2.inRange(hsv_image, (175, 160, 80), (180, 255, 255))
 
-    cv2.imshow("orange", mask)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+        # Combine two masks 
+        mask = mask1 + mask2
+
+        # Use Closing to remove noise from mask 
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, KERNEL)
+
+        # If the mask needs to be saved
+        if args.save:
+            cv2.imwrite(os.path.join(OUTPUT_PATH, filename), mask)
+
+        # If the mask needs to be displayed
+        if args.display:
+            cv2.imshow("mask", mask)
+            cv2.waitKey()
+            cv2.destroyAllWindows()
 
 
