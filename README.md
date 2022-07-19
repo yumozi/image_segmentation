@@ -14,7 +14,9 @@ numpy
 os
 
 ### How it works
-My program first creates rough masks by picking out areas that best match the color of the barrels using HSV thresholding. Then, I use morphological closing to reduce the amount of noise in the masks.
+My program first creates rough masks by picking out areas that best match the color of the barrels using HSV thresholding. The color range of the barrels is determined manually using a color picker tool. 
+
+Then, I use morphological closing to reduce the amount of noise in the masks.
 
 ### Improvements
 Currently, the main issue with my solution is that there are too many false positive blobs in the masks. To deal with this, I plan to use contour detection to remove the blobs with relatively smaller areas in each mask.
