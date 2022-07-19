@@ -42,7 +42,7 @@ if __name__=='__main__':
         # Combine two masks 
         mask = mask1 + mask2
 
-        # Use Closing to remove noise from mask 
+        # Use closing to remove noise from mask 
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, KERNEL)
 
         # If the mask needs to be saved
@@ -54,5 +54,4 @@ if __name__=='__main__':
             cv2.imshow("mask", mask)
             cv2.waitKey()
             cv2.destroyAllWindows()
-
-
+            
